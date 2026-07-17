@@ -9,40 +9,40 @@ import jwt
 from app.config import settings
 
 
-def verify_hmac(query_params: dict) -> bool:
-    """
-    Checks that a request landing on our /shopify/app page really came from
-    Shopify, and wasn't faked by someone else. Shopify signs every request
-    with a hash (hmac) using our app's secret key — we recompute that same
-    hash ourselves and compare it. If they match, the request is genuine.
-    """
-    params = {k: v for k, v in query_params.items() if k != "hmac"}
-    received_hmac = query_params.get("hmac", "")
+# def verify_hmac(query_params: dict) -> bool:
+#     """
+#     Checks that a request landing on our /shopify/app page really came from
+#     Shopify, and wasn't faked by someone else. Shopify signs every request
+#     with a hash (hmac) using our app's secret key — we recompute that same
+#     hash ourselves and compare it. If they match, the request is genuine.
+#     """
+#     params = {k: v for k, v in query_params.items() if k != "hmac"}
+#     received_hmac = query_params.get("hmac", "")
 
-    sorted_params = urlencode(sorted(params.items()))
-    computed_hmac = hmac_lib.new(
-        settings.shopify_client_secret.encode(),
-        sorted_params.encode(),
-        hashlib.sha256,
-    ).hexdigest()
+#     sorted_params = urlencode(sorted(params.items()))
+#     computed_hmac = hmac_lib.new(
+#         settings.shopify_client_secret.encode(),
+#         sorted_params.encode(),
+#         hashlib.sha256,
+#     ).hexdigest()
 
-    return hmac_lib.compare_digest(computed_hmac, received_hmac)
+#     return hmac_lib.compare_digest(computed_hmac, received_hmac)
 
 
-def verify_session_token(token: str) -> dict:
-    """
-    Checks that the session token our embedded page received from App Bridge
-    is real and untampered. This token is how Shopify proves "this request
-    is really coming from inside your app, loaded in our admin." We decode
-    it using our client secret; if the signature doesn't match, it's rejected.
-    """
-    return jwt.decode(
-        token,
-        settings.shopify_client_secret,
-        algorithms=["HS256"],
-        audience=settings.shopify_client_id,
-        leeway=60,  # allows for small clock differences between servers
-    )
+# def verify_session_token(token: str) -> dict:
+#     """
+#     Checks that the session token our embedded page received from App Bridge
+#     is real and untampered. This token is how Shopify proves "this request
+#     is really coming from inside your app, loaded in our admin." We decode
+#     it using our client secret; if the signature doesn't match, it's rejected.
+#     """
+#     return jwt.decode(
+#         token,
+#         settings.shopify_client_secret,
+#         algorithms=["HS256"],
+#         audience=settings.shopify_client_id,
+#         leeway=60,  # allows for small clock differences between servers
+#     )
 
 
 async def exchange_token(shop_domain: str, session_token: str) -> dict:
