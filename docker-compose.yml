@@ -1,0 +1,29 @@
+services:
+  backend:
+    build: .
+    container_name: st-sandbox-backend
+    ports:
+      - "8100:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app
+    depends_on:
+      - db
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:16-alpine
+    container_name: st-sandbox-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: stsandbox
+      POSTGRES_PASSWORD: stsandbox
+      POSTGRES_DB: stsandbox
+    ports:
+      - "5200:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
